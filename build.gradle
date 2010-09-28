@@ -1,0 +1,8 @@
+apply from: 'dependencyDefinitions.gradle'
+apply from: 'config.gradle'
+
+project(':pgp-gradle-plugin').dependencies {
+	compile libraries.'slf4j-api'
+	compile libraries.'bcpg'
+}
+

@@ -1,0 +1,47 @@
+This is a very rough version of a plugin that's supposed to work like
+the maven-gpg-plugin. It should be able to sign all artifacts before
+uploading them, including the signature files.
+
+As I stated, everything is still unfinished.
+
+To use the plugin, clone this repository and build calling 'gradle'.
+
+In the project that would like to use this plugin, add the following:
+
+buildscript {
+def localReleaseRepo1 = new File("${System.properties.'user.home'}/local-gradle-repository/release").toURL().toString()
+def localSnapshotRepo1 = new File("${System.properties.'user.home'}/local-gradle-repository/snapshot").toURL().toString()
+	repositories {
+		mavenCentral()
+		mavenRepo urls: localReleaseRepo1
+		mavenRepo urls: localSnapshotRepo1
+	}
+	dependencies {
+		classpath 'de.huxhorn.gradle:pgp-gradle-plugin:0.0.1-SNAPSHOT'
+	}
+}
+
+You can then apply plugin:
+allprojects {
+    apply plugin: PgpPlugin
+    
+	pgp {
+		secretKeyRingFile = new File("${System.properties['user.home']}/.gnupg/secring.gpg")
+		keyId = '740A1840'
+	}
+}
+
+
+The current version has several issues:
+- The created signature files are not added to the set of artifacts, meaning they are not deployed to the maven repository.
+- If no password is given using either the System property 'pgp.password' or 
+  password in the convention above (which would actually both be a rather bad 
+  idea concerning security) then the plugin asks once for password entry using
+  console.readPassword. This requires Java 6.
+- The text output 'Enter PGP-Password: ' is mixed up with the '> Building > :foo:uploadArchives' text. 
+  The password is prompted for after the later one.
+- This plugin currently attaches itself to uploadArtifact.doFirst - which is probably a bad idea.
+- The configuration used for signing is always 'default'
+
+I'd appreciate any input and suggestions concerning this plugin, the issues above or general ideas how to enhance it.
+

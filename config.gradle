@@ -1,0 +1,118 @@
+artifactMapping = [
+'pgp-gradle-plugin':                 'de.huxhorn.gradle.pgp-plugin'
+]
+
+dependsOnChildren()
+
+allprojects {
+	defaultTasks 'clean', 'build', 'uploadArchives'
+	group = 'de.huxhorn.gradle'
+	version = '0.0.1'
+	if(!System.properties.'release')
+	{
+		version = version + '-SNAPSHOT'
+	}
+}
+
+def localReleaseRepo = new File("${System.properties.'user.home'}/local-gradle-repository/release").toURL().toString()
+def localSnapshotRepo = new File("${System.properties.'user.home'}/local-gradle-repository/snapshot").toURL().toString()
+
+subprojects {
+    apply plugin: 'groovy'
+    apply plugin: 'maven'
+
+	task sourceJar(type: Jar) { from sourceSets.main.allSource; classifier = 'source' }
+	task javadocJar(type: Jar) { from javadoc.outputs.files; classifier = 'javadoc' }
+	
+	artifacts { archives sourceJar, javadocJar }
+
+    repositories {
+       mavenCentral()
+       mavenRepo urls: localReleaseRepo
+       mavenRepo urls: localSnapshotRepo
+    }
+    
+	configurations {
+		all*.exclude group: 'commons-logging', module: 'commons-logging'
+	}
+	
+    dependencies {
+		compile gradleApi()
+		groovy localGroovy()
+        testCompile libraries.junit
+        testCompile libraries.'slf4j-api'
+        testRuntime libraries.'logback-classic'
+    }
+
+    defaultProject= {
+    	url 'http://gradle.huxhorn.de'
+    	
+    	inceptionYear '2010'
+    	
+    	scm {
+    		connection 'scm:git:git://github.com/huxi/huxi-gradle-plugins.git'
+    		developerConnection 'scm:git:ssh://git@github.com:huxi/huxi-gradle-plugins.git'
+    		url 'http://github.com/huxi/huxi-gradle-plugins/'
+    	}
+    	
+		licenses {
+			license {
+				name 'GNU Lesser General Public License v3 (LGPL)'
+				url 'http://www.gnu.org/copyleft/lesser.html'
+				distribution 'repo'
+			}
+			
+			license {
+				name 'The Apache Software License, Version 2.0'
+				url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+				distribution 'repo'
+			}
+		}
+		
+		developers {
+			developer {
+				id 'huxhorn'
+				email 'huxhorn@users.sourceforge.net'
+				name 'Joern Huxhorn'
+				organization 'Joern Huxhorn'
+				organizationUrl 'http://lilith.huxhorn.de'
+				roles {
+					role 'Developer'
+				}
+			}
+		}
+		
+		properties {
+			'project.build.sourceEncoding' 'UTF-8'
+			'project.reporting.outputEncoding' 'UTF-8'
+		}
+	}
+    
+	def deployer = null	
+
+	// the following is a workaround for http://jira.codehaus.org/browse/GRADLE-443
+	uploadArchives {
+		deployer = repositories.mavenDeployer {
+			repository(url: localReleaseRepo)
+			snapshotRepository(url: localSnapshotRepo)
+			pom.whenConfigured { pom ->
+				// dep is a native Maven dependency object (With properties artifactId, groupId, ...)
+				for(dep in pom.dependencies) {
+					//println(dep.artifactId)
+					mapping=artifactMapping[dep.artifactId];
+					if(mapping) {
+						println("Mapping ${dep.artifactId} to ${mapping}...")
+						dep.artifactId=mapping
+					}
+				}
+			}
+		}
+	}
+	
+	installer = install.repositories.mavenInstaller
+	
+	installer.pom.project defaultProject
+	
+	deployer.pom.project defaultProject
+}
+
