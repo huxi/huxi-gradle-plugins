@@ -31,6 +31,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package de.huxhorn.gradle.pgp 
+
 import org.bouncycastle.bcpg.ArmoredOutputStream
 import org.bouncycastle.bcpg.BCPGOutputStream
 import org.bouncycastle.jce.provider.BouncyCastleProvider
@@ -49,79 +52,6 @@ import org.slf4j.LoggerFactory
 import java.io.FileInputStream
 import java.security.Security
 
-import org.gradle.api.*
-import org.gradle.api.logging.*
-
-class PgpPlugin implements Plugin<Project> {
-	def logger = Logging.getLogger(this.class)
-	
-	private Signer signer=new Signer();
-	
-	def void apply(Project project) {
-        project.convention.plugins.pgp = new PgpPluginConvention()
-		project.getByName('uploadArchives').doFirst {
-			
-			if(!project.convention.plugins.pgp.secretKeyRingFile)
-			{
-				throw new InvalidUserDataException("Missing secretKeyRingFile! Specify using 'pgp { secretKeyRingFile = file }'.")
-			}
-			if(!project.convention.plugins.pgp.keyId)
-			{
-				throw new InvalidUserDataException("Missing keyId! Specify using 'pgp { secretKeyRingFile = 'cafebabe' }'.")
-			}
-
-			boolean resetPassword = false
-			signer.setSecretKeyRingFile( project.convention.plugins.pgp.secretKeyRingFile )
-
-			if(project.convention.plugins.pgp.keyId != signer.keyId) {
-				signer.keyId = project.convention.plugins.pgp.keyId
-				resetPassword = true
-				// reset signer password if keyId changes
-				// this enables signing with different keys in submodules
-			}
-			
-			if(resetPassword) {
-				signer.password = project.convention.plugins.pgp.password
-			}
-
-			def defConf=project.getConfigurations().getByName('default')
-			
-			List<File> allFiles=new ArrayList<File>()
-			for(File file in defConf.allArtifactFiles.files) {
-				if(logger.isInfoEnabled())
-					logger.info("Creating signature(s) for file '${file.absolutePath}'...")
-				List<File> files = signer.sign(file)
-				if(files)
-				{
-					if(logger.isDebugEnabled())
-						logger.debug("Created signature files '{}'...", files)
-					allFiles.addAll(files);
-				}
-			}
-			if(logger.isInfoEnabled())
-				logger.info("Created signature files '{}'...", allFiles)
-			
-			for(File file in allFiles)
-			{
-				// doesn't work ;(
-				//project.artifacts.'default' file
-			}
-		}
-	}
-}
-
-class PgpPluginConvention {
-	File secretKeyRingFile;
-	String keyId;
-	String password = System.getProperty('pgp.password')
-	
-	def pgp(Closure closure) {
-        closure.delegate = this
-        closure() 
-    }
-
-}
-
 enum SignatureOutput {
 	Armored,
 	Binary,
@@ -135,8 +65,8 @@ enum SignatureOutput {
 @Grab(group='org.slf4j', module='slf4j-api', version='1.6.1')
 ])
 */
-class Signer {
-	private final Logger logger = LoggerFactory.getLogger(Signer.class)
+class PgpSigner {
+	private final Logger logger = LoggerFactory.getLogger(PgpSigner.class)
 	private static final String PROVIDER = 'BC'
 	
 	private static final int BUFFER_SIZE = 1024
