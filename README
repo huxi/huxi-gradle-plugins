@@ -9,21 +9,23 @@ To use the plugin, clone this repository and build calling 'gradle'.
 In the project that would like to use this plugin, add the following:
 
 buildscript {
-def localReleaseRepo1 = new File("${System.properties.'user.home'}/local-gradle-repository/release").toURL().toString()
-def localSnapshotRepo1 = new File("${System.properties.'user.home'}/local-gradle-repository/snapshot").toURL().toString()
+	localReleaseRepo = new File("${System.properties.'user.home'}/local-gradle-repository/release").toURL().toString()
+	localSnapshotRepo = new File("${System.properties.'user.home'}/local-gradle-repository/snapshot").toURL().toString()
 	repositories {
 		mavenCentral()
-		mavenRepo urls: localReleaseRepo1
-		mavenRepo urls: localSnapshotRepo1
+		mavenRepo urls: localReleaseRepo
+		mavenRepo urls: localSnapshotRepo
 	}
 	dependencies {
-		classpath 'de.huxhorn.gradle:pgp-gradle-plugin:0.0.1-SNAPSHOT'
+		classpath 'de.huxhorn.gradle:pgp-gradle-plugin:0.0.2-SNAPSHOT'
 	}
 }
 
 You can then apply plugin:
 allprojects {
-    apply plugin: PgpPlugin
+// below doesn't work yet...
+//	apply plugin: 'sign'
+	apply plugin: de.huxhorn.gradle.pgp.PgpPlugin
     
 	pgp {
 		secretKeyRingFile = new File("${System.properties['user.home']}/.gnupg/secring.gpg")
