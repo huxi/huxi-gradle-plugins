@@ -40,7 +40,11 @@ import org.gradle.api.logging.*
 class PgpPlugin implements Plugin<Project> {
 	def logger = Logging.getLogger(this.class)
 	
-	private PgpSigner signer=new PgpSigner();
+	/**
+	 * Static so password is only requested once if keyId isn't changed in
+	 * sub-projects.
+	 */
+	private static PgpSigner signer=new PgpSigner();
 	
 	def void apply(Project project) {
         project.convention.plugins.pgp = new PgpPluginConvention()
