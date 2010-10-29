@@ -75,6 +75,7 @@ class PgpPlugin implements Plugin<Project> {
 			}
 
 			def defConf=project.getConfigurations().getByName('default')
+			def archivesConf=project.getConfigurations().getByName('archives')
 			
 			List<File> allFiles=new ArrayList<File>()
 			for(File file in defConf.allArtifactFiles.files) {
@@ -90,7 +91,7 @@ class PgpPlugin implements Plugin<Project> {
 						def extension=f.name
 						extension = extension.substring(extension.lastIndexOf('.')+1)
 						DefaultPublishArtifact artifact = new DefaultPublishArtifact(file.name, extension, extension, null, new Date(), f, this) 
-						defConf.addArtifact(artifact)
+						archivesConf.addArtifact(artifact)
 						if(logger.isDebugEnabled())
 							logger.debug("Added artifact: {}", artifact)
 					}
