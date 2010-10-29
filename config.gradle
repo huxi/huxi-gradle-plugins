@@ -14,12 +14,47 @@ allprojects {
 	}
 }
 
-def localReleaseRepo = new File("${System.properties.'user.home'}/local-gradle-repository/release").toURL().toString()
-def localSnapshotRepo = new File("${System.properties.'user.home'}/local-gradle-repository/snapshot").toURL().toString()
+//def localReleaseRepo = new File("${System.properties.'user.home'}/local-gradle-repository/release").toURL().toString()
+//def localSnapshotRepo = new File("${System.properties.'user.home'}/local-gradle-repository/snapshot").toURL().toString()
+
+buildscript {
+	apply from: 'dependencyDefinitions.gradle'
+	version = '0.0.2'
+	if(!System.properties.'release')
+	{
+		version = version + '-SNAPSHOT'
+	}
+	localReleaseRepo = new File("${System.properties.'user.home'}/local-gradle-repository/release").toURL().toString()
+	localSnapshotRepo = new File("${System.properties.'user.home'}/local-gradle-repository/snapshot").toURL().toString()
+	repositories {
+		mavenCentral()
+		mavenRepo urls: localReleaseRepo
+		mavenRepo urls: localSnapshotRepo
+	}
+	if(System.properties.'sign')
+	{
+		dependencies {
+			classpath "de.huxhorn.gradle:de.huxhorn.gradle.pgp-plugin:${version}"
+		}
+	}
+}
 
 subprojects {
-    apply plugin: 'groovy'
+
+	apply plugin: 'groovy'
     apply plugin: 'maven'
+    
+	if(System.properties.'sign')
+	{
+		//apply plugin: 'sign'
+		apply plugin: de.huxhorn.gradle.pgp.PgpPlugin
+		
+		pgp {
+			secretKeyRingFile = new File("${System.properties['user.home']}/.gnupg/secring.gpg")
+			keyId = '740A1840'
+		}
+	}
+
 
 	task sourceJar(type: Jar) { from sourceSets.main.allSource; classifier = 'source' }
 	task javadocJar(type: Jar) { from javadoc.outputs.files; classifier = 'javadoc' }
@@ -32,6 +67,13 @@ subprojects {
        mavenRepo urls: localSnapshotRepo
     }
     
+    mapped=artifactMapping[project.name];
+    if(!mapped)
+    {
+    	throw new IllegalStateException("${project.name} does not have an entry in artifactMapping!");
+    }
+    archivesBaseName=mapped
+
 	configurations {
 		all*.exclude group: 'commons-logging', module: 'commons-logging'
 	}

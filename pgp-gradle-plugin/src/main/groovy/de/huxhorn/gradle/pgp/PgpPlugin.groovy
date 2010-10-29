@@ -36,6 +36,7 @@ package de.huxhorn.gradle.pgp
 
 import org.gradle.api.*
 import org.gradle.api.logging.*
+import org.gradle.api.internal.artifacts.publish.DefaultPublishArtifact
 
 class PgpPlugin implements Plugin<Project> {
 	def logger = Logging.getLogger(this.class)
@@ -84,6 +85,15 @@ class PgpPlugin implements Plugin<Project> {
 				{
 					if(logger.isDebugEnabled())
 						logger.debug("Created signature files '{}'...", files)
+					for(File f in files)
+					{
+						def extension=f.name
+						extension = extension.substring(extension.lastIndexOf('.')+1)
+						DefaultPublishArtifact artifact = new DefaultPublishArtifact(file.name, extension, extension, null, new Date(), f, this) 
+						defConf.addArtifact(artifact)
+						if(logger.isDebugEnabled())
+							logger.debug("Added artifact: {}", artifact)
+					}
 					allFiles.addAll(files);
 				}
 			}

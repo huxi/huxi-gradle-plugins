@@ -44,6 +44,18 @@ The current version has several issues:
   The password is prompted for after the later one.
 - This plugin currently attaches itself to uploadArtifact.doFirst - which is probably a bad idea.
 - The configuration used for signing is always 'default'
+- Artifacts are attached to 'default' configuration but are ignored by uploadArchives.
+
+To perform a release you have to call
+
+gradle -Drelease=true
+
+Then you need to delete the ivy cache:
+rm -rf ~/.gradle
+
+Signing can (or should) be performed calling
+gradle -Drelease=true -Dsign=true
+But, as mentioned above, the artifacts are still ignored by uploadArchives.
 
 I'd appreciate any input and suggestions concerning this plugin, the issues above or general ideas how to enhance it.
 
