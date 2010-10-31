@@ -90,7 +90,18 @@ class PgpPlugin implements Plugin<Project> {
 					{
 						def extension=f.name
 						extension = extension.substring(extension.lastIndexOf('.')+1)
-						DefaultPublishArtifact artifact = new DefaultPublishArtifact(file.name, extension, extension, null, new Date(), f, this) 
+						// using null as classifier doesn't work since gradle complains about more than
+						// one main artifact.
+						// Setting a classifier, however, does not have the desired result either.
+						// I've set "signature" below.
+						// This results in overwritten files during upload and superfluous
+						// classifier, i.e. de.huxhorn.gradle.pgp-plugin-0.0.2-signature.sig
+						// & de.huxhorn.gradle.pgp-plugin-0.0.2-signature.asc are uploaded
+						// for main artifact, javadoc and sources.
+						// The "-signature" should not be there, the original classifier, if any,
+						// should be preserved.
+						// The files in build/libs are correct, btw.
+						DefaultPublishArtifact artifact = new DefaultPublishArtifact(file.name, extension, extension, "signature", new Date(), f, this) 
 						archivesConf.addArtifact(artifact)
 						if(logger.isDebugEnabled())
 							logger.debug("Added artifact: {}", artifact)
