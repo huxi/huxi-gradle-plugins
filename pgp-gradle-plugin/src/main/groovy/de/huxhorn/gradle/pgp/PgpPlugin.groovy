@@ -101,10 +101,12 @@ class PgpPlugin implements Plugin<Project> {
 						// The "-signature" should not be there, the original classifier, if any,
 						// should be preserved.
 						// The files in build/libs are correct, btw.
+						/*
 						DefaultPublishArtifact artifact = new DefaultPublishArtifact(file.name, extension, extension, "signature", new Date(), f, this) 
 						archivesConf.addArtifact(artifact)
 						if(logger.isDebugEnabled())
 							logger.debug("Added artifact: {}", artifact)
+						*/
 					}
 					allFiles.addAll(files);
 				}
