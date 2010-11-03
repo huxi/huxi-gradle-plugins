@@ -57,7 +57,7 @@ class PgpPlugin implements Plugin<Project> {
 			}
 			if(!project.convention.plugins.pgp.keyId)
 			{
-				throw new InvalidUserDataException("Missing keyId! Specify using 'pgp { secretKeyRingFile = 'cafebabe' }'.")
+				throw new InvalidUserDataException("Missing keyId! Specify using 'pgp { keyId = 'cafebabe' }'.")
 			}
 
 			boolean resetPassword = false
@@ -84,40 +84,34 @@ class PgpPlugin implements Plugin<Project> {
 				List<File> files = signer.sign(file)
 				if(files)
 				{
-					if(logger.isDebugEnabled())
-						logger.debug("Created signature files '{}'...", files)
-					for(File f in files)
-					{
-						def extension=f.name
-						extension = extension.substring(extension.lastIndexOf('.')+1)
-						// using null as classifier doesn't work since gradle complains about more than
-						// one main artifact.
-						// Setting a classifier, however, does not have the desired result either.
-						// I've set "signature" below.
-						// This results in overwritten files during upload and superfluous
-						// classifier, i.e. de.huxhorn.gradle.pgp-plugin-0.0.2-signature.sig
-						// & de.huxhorn.gradle.pgp-plugin-0.0.2-signature.asc are uploaded
-						// for main artifact, javadoc and sources.
-						// The "-signature" should not be there, the original classifier, if any,
-						// should be preserved.
-						// The files in build/libs are correct, btw.
-						/*
-						DefaultPublishArtifact artifact = new DefaultPublishArtifact(file.name, extension, extension, "signature", new Date(), f, this) 
-						archivesConf.addArtifact(artifact)
-						if(logger.isDebugEnabled())
-							logger.debug("Added artifact: {}", artifact)
-						*/
-					}
 					allFiles.addAll(files);
+					if(logger.isDebugEnabled()) logger.debug('Created signature files \'{}\'...', files)
 				}
 			}
-			if(logger.isInfoEnabled())
-				logger.info("Created signature files '{}'...", allFiles)
-			
+			if(logger.isInfoEnabled()) logger.info('Created signature files {}.', allFiles)
+
+			def findClassifierPattern = /(.+?)-$project.version(?:-(.+))?\.(\w+\.asc)/
+
 			for(File file in allFiles)
 			{
-				// doesn't work ;(
-				//project.artifacts.'default' file
+				def filename = file.name
+				assert filename ==~ findClassifierPattern
+				// xlson saved the day again ;)
+				(filename =~ findClassifierPattern).find { full, basename, classifier, fileEnding ->
+					if(logger.isDebugEnabled()) {
+						logger.debug('Full: {}', full)
+						logger.debug('Basename: {}', basename)
+						logger.debug('Classifier: {}', classifier)
+						logger.debug('File ending: {}', fileEnding)
+					}
+
+					// This code requires b61193bd38ba88e73f197957b597862897a6f2dc
+					// (Fri Oct 01 2010 01:41:47 GMT+0200 (CEST)) or newer
+					// of Gradle
+					DefaultPublishArtifact artifact = new DefaultPublishArtifact(full, 'Artifact Signature', fileEnding, classifier, new Date(), file, this) 
+					archivesConf.addArtifact(artifact)
+					if(logger.isDebugEnabled()) logger.debug('Added artifact: {}', artifact)
+				}
 			}
 		}
 	}
