@@ -1,3 +1,9 @@
+See 
+http://jira.codehaus.org/browse/GRADLE-1172 - Add PGP signature support to the maven plugin
+http://jira.codehaus.org/browse/GRADLE-1035 - Provide a 'maven central' plugin to ease deployment of artifacts and ensure well-formed poms
+for related Gradle issues.
+
+
 This is a very rough version of a plugin that's supposed to work like
 the maven-gpg-plugin. It should be able to sign all artifacts before
 uploading them, including the signature files.
