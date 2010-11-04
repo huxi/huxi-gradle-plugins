@@ -51,20 +51,31 @@ class PgpPlugin implements Plugin<Project> {
         project.convention.plugins.pgp = new PgpPluginConvention()
 		project.getByName('uploadArchives').doFirst {
 			
-			if(!project.convention.plugins.pgp.secretKeyRingFile)
-			{
-				throw new InvalidUserDataException("Missing secretKeyRingFile! Specify using 'pgp { secretKeyRingFile = file }'.")
+			def secretKeyRingFile = project.convention.plugins.pgp.secretKeyRingFile
+			def keyId = project.convention.plugins.pgp.keyId
+			if(!secretKeyRingFile || !secretKeyRingFile.isFile()
+				&& project.hasProperty('pgpSecretKeyRingFile')) {
+				secretKeyRingFile = new File(project.pgpSecretKeyRingFile)
 			}
-			if(!project.convention.plugins.pgp.keyId)
-			{
-				throw new InvalidUserDataException("Missing keyId! Specify using 'pgp { keyId = 'cafebabe' }'.")
+			if(!secretKeyRingFile) {
+				throw new InvalidUserDataException("Missing secretKeyRingFile! Specify using convention 'pgp { secretKeyRingFile = file }' or gradle property '-PpgpSecretKeyRingFile=file'.")
+			}
+			if(!secretKeyRingFile.isFile()) {
+				throw new InvalidUserDataException("Invalid secretKeyRingFile '$secretKeyRingFile.absolutePath'! Specify using convention 'pgp { secretKeyRingFile = file }' or gradle property '-PpgpSecretKeyRingFile=file'.")
+			}
+
+			if(!keyId && project.hasProperty('pgpKeyId')) {
+				keyId = project.pgpKeyId
+			}
+			if(!keyId) {
+				throw new InvalidUserDataException("Missing keyId! Specify using convention 'pgp { keyId = 'cafebabe' }' or gradle property '-PpgpKeyId=cafebabe'.")
 			}
 
 			boolean resetPassword = false
-			signer.setSecretKeyRingFile( project.convention.plugins.pgp.secretKeyRingFile )
+			signer.setSecretKeyRingFile( secretKeyRingFile )
 
-			if(project.convention.plugins.pgp.keyId != signer.keyId) {
-				signer.keyId = project.convention.plugins.pgp.keyId
+			if(keyId != signer.keyId) {
+				signer.keyId = keyId
 				resetPassword = true
 				// reset signer password if keyId changes
 				// this enables signing with different keys in submodules
@@ -72,6 +83,10 @@ class PgpPlugin implements Plugin<Project> {
 			
 			if(resetPassword) {
 				signer.password = project.convention.plugins.pgp.password
+			}
+
+			if(!signer.password && project.hasProperty('pgpPassword')) {
+				signer.password = project.pgpPassword
 			}
 
 			def defConf=project.getConfigurations().getByName('default')
@@ -118,9 +133,9 @@ class PgpPlugin implements Plugin<Project> {
 }
 
 class PgpPluginConvention {
-	File secretKeyRingFile;
-	String keyId;
-	String password = System.getProperty('pgp.password')
+	File secretKeyRingFile
+	String keyId
+	String password
 	
 	def pgp(Closure closure) {
         closure.delegate = this

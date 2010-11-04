@@ -33,10 +33,30 @@ allprojects {
 	}
 }
 
+Configuration is either done by the pgp convention like this:
+pgp {
+	secretKeyRingFile = new File("${System.properties['user.home']}/.gnupg/secring.gpg")
+	keyId = '740A1840'
+	password = 'youShouldNotDoThis'
+}
+or using gradle properties:
+-PpgpKeyId
+-PpgpSecretKeyRingFile=/path/to/file
+-PpgpPassword=youShoudlntDoThisEither
+
+Information in the pgp convention overrides gradle properties!
+
+Concerning the password, the best idea would probably be to define it neither in convention nor by properties.
+In that case it is asked once at the start of the signing process.
+
+Keep in mind that you can also define the above gradle properties in the file
+~/.gradle/gradle.properties
+
+See http://www.gradle.org/0.9-rc-2/docs/userguide/tutorial_this_and_that.html#sec:gradle_properties_and_system_properties
 
 The current version has several issues:
-- The created signature files are not added to the set of artifacts, meaning they are not deployed to the maven repository.
-- If no password is given using either the System property 'pgp.password' or 
+- The pom file itself isn't signed yet! Only the artifacts are signed at the moment.
+- If no password is given using either the gradle property 'pgpPassword' or 
   password in the convention above (which would actually both be a rather bad 
   idea concerning security) then the plugin asks once for password entry using
   console.readPassword. This requires Java 6.
@@ -44,18 +64,16 @@ The current version has several issues:
   The password is prompted for after the later one.
 - This plugin currently attaches itself to uploadArtifact.doFirst - which is probably a bad idea.
 - The configuration used for signing is always 'default'
-- Artifacts are attached to 'default' configuration but are ignored by uploadArchives.
 
 To perform a release you have to call
 
 gradle -Drelease=true
 
 Then you need to delete the ivy cache:
-rm -rf ~/.gradle
+rm -rf ~/.gradle/cache
 
 Signing can (or should) be performed calling
 gradle -Drelease=true -Dsign=true
-But, as mentioned above, the artifacts are still ignored by uploadArchives.
 
 I'd appreciate any input and suggestions concerning this plugin, the issues above or general ideas how to enhance it.
 
