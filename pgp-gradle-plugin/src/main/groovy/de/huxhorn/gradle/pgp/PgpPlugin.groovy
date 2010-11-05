@@ -39,6 +39,10 @@ import org.gradle.api.logging.*
 import org.gradle.api.internal.artifacts.publish.DefaultPublishArtifact
 import org.gradle.api.artifacts.maven.MavenDeployer
 
+/**
+ * This class requires Gradle ff3496fd63d39769d2d2df154ae373493c504f41
+ * Fri Nov 05 2010 05:49:51 GMT+0100 (CET) or newer
+ */
 class PgpPlugin implements Plugin<Project> {
 	def logger = Logging.getLogger(this.class)
 	
@@ -53,102 +57,87 @@ class PgpPlugin implements Plugin<Project> {
         def uploadTask = project.getByName('uploadArchives')
         uploadTask.repositories.withType(MavenDeployer).allObjects { repository ->
 			repository.beforeDeployment { mavenDeployment ->
-			println mavenDeployment.pomArtifact.file
-			//mavenDeployment.addArtifact(new DefaultPublishArtifact(.....))
-			//}
-		//}
-		//project.getByName('uploadArchives').doFirst {
-			def secretKeyRingFile = project.convention.plugins.pgp.secretKeyRingFile
-			def keyId = project.convention.plugins.pgp.keyId
-			if(!secretKeyRingFile || !secretKeyRingFile.isFile()
-				&& project.hasProperty('pgpSecretKeyRingFile')) {
-				secretKeyRingFile = new File(project.pgpSecretKeyRingFile)
-			}
-			if(!secretKeyRingFile) {
-				throw new InvalidUserDataException("Missing secretKeyRingFile! Specify using convention 'pgp { secretKeyRingFile = file }' or gradle property '-PpgpSecretKeyRingFile=file'.")
-			}
-			if(!secretKeyRingFile.isFile()) {
-				throw new InvalidUserDataException("Invalid secretKeyRingFile '$secretKeyRingFile.absolutePath'! Specify using convention 'pgp { secretKeyRingFile = file }' or gradle property '-PpgpSecretKeyRingFile=file'.")
-			}
-
-			if(!keyId && project.hasProperty('pgpKeyId')) {
-				keyId = project.pgpKeyId
-			}
-			if(!keyId) {
-				throw new InvalidUserDataException("Missing keyId! Specify using convention 'pgp { keyId = 'cafebabe' }' or gradle property '-PpgpKeyId=cafebabe'.")
-			}
-
-			boolean resetPassword = false
-			signer.setSecretKeyRingFile( secretKeyRingFile )
-
-			if(keyId != signer.keyId) {
-				signer.keyId = keyId
-				resetPassword = true
-				// reset signer password if keyId changes
-				// this enables signing with different keys in submodules
-			}
-			
-			if(resetPassword) {
-				signer.password = project.convention.plugins.pgp.password
-			}
-
-			if(!signer.password && project.hasProperty('pgpPassword')) {
-				signer.password = project.pgpPassword
-			}
-
-			def defConf=project.getConfigurations().getByName('default')
-			//def archivesConf=project.getConfigurations().getByName('archives')
-			
-			List<File> allFiles=new ArrayList<File>()
-			List<File> signFiles=new ArrayList<File>(defConf.allArtifactFiles.files)
-			signFiles.add(mavenDeployment.pomArtifact.file)
-			for(File file in signFiles) {
-				if(logger.isInfoEnabled())
-					logger.info("Creating signature(s) for file '${file.absolutePath}'...")
-				List<File> files = signer.sign(file)
-				if(files)
-				{
-					allFiles.addAll(files);
-					if(logger.isDebugEnabled()) logger.debug('Created signature files \'{}\'...', files)
+				def secretKeyRingFile = project.convention.plugins.pgp.secretKeyRingFile
+				def keyId = project.convention.plugins.pgp.keyId
+				if(!secretKeyRingFile || !secretKeyRingFile.isFile()
+					&& project.hasProperty('pgpSecretKeyRingFile')) {
+					secretKeyRingFile = new File(project.pgpSecretKeyRingFile)
 				}
-			}
-			if(logger.isInfoEnabled()) logger.info('Created signature files {}.', allFiles)
-
-			def findClassifierPattern = /(.+?)-$project.version(?:-(.+))?\.(\w+\.asc)/
-
-			for(File file in allFiles)
-			{
-				def filename = file.name
-				if(filename.endsWith('.xml.asc')) {
-					// This code requires b61193bd38ba88e73f197957b597862897a6f2dc
-					// (Fri Oct 01 2010 01:41:47 GMT+0200 (CEST)) or newer
-					// of Gradle
-					DefaultPublishArtifact artifact = new DefaultPublishArtifact(filename, 'Artifact Signature', 'pom.asc', null, new Date(), file, this) 
-					//archivesConf.addArtifact(artifact)
-					mavenDeployment.addArtifact(artifact)
-					if(logger.isDebugEnabled()) logger.debug('Added artifact: {}', artifact)
-				} else {
-				assert filename ==~ findClassifierPattern
-				// xlson saved the day again ;)
-				(filename =~ findClassifierPattern).find { full, basename, classifier, fileEnding ->
-					if(logger.isDebugEnabled()) {
-						logger.debug('Full: {}', full)
-						logger.debug('Basename: {}', basename)
-						logger.debug('Classifier: {}', classifier)
-						logger.debug('File ending: {}', fileEnding)
+				if(!secretKeyRingFile) {
+					throw new InvalidUserDataException("Missing secretKeyRingFile! Specify using convention 'pgp { secretKeyRingFile = file }' or gradle property '-PpgpSecretKeyRingFile=file'.")
+				}
+				if(!secretKeyRingFile.isFile()) {
+					throw new InvalidUserDataException("Invalid secretKeyRingFile '$secretKeyRingFile.absolutePath'! Specify using convention 'pgp { secretKeyRingFile = file }' or gradle property '-PpgpSecretKeyRingFile=file'.")
+				}
+	
+				if(!keyId && project.hasProperty('pgpKeyId')) {
+					keyId = project.pgpKeyId
+				}
+				if(!keyId) {
+					throw new InvalidUserDataException("Missing keyId! Specify using convention 'pgp { keyId = 'cafebabe' }' or gradle property '-PpgpKeyId=cafebabe'.")
+				}
+	
+				boolean resetPassword = false
+				signer.setSecretKeyRingFile( secretKeyRingFile )
+	
+				if(keyId != signer.keyId) {
+					signer.keyId = keyId
+					resetPassword = true
+					// reset signer password if keyId changes
+					// this enables signing with different keys in submodules
+				}
+				
+				if(resetPassword) {
+					signer.password = project.convention.plugins.pgp.password
+				}
+	
+				if(!signer.password && project.hasProperty('pgpPassword')) {
+					signer.password = project.pgpPassword
+				}
+	
+				def defConf=project.getConfigurations().getByName('default')
+				
+				List<File> allFiles=new ArrayList<File>()
+				List<File> signFiles=new ArrayList<File>(defConf.allArtifactFiles.files)
+				signFiles.add(mavenDeployment.pomArtifact.file)
+				for(File file in signFiles) {
+					if(logger.isInfoEnabled())
+						logger.info("Creating signature(s) for file '${file.absolutePath}'...")
+					List<File> files = signer.sign(file)
+					if(files)
+					{
+						allFiles.addAll(files);
+						if(logger.isDebugEnabled()) logger.debug('Created signature files \'{}\'...', files)
 					}
-
-					// This code requires b61193bd38ba88e73f197957b597862897a6f2dc
-					// (Fri Oct 01 2010 01:41:47 GMT+0200 (CEST)) or newer
-					// of Gradle
-					DefaultPublishArtifact artifact = new DefaultPublishArtifact(full, 'Artifact Signature', fileEnding, classifier, new Date(), file, this) 
-					//archivesConf.addArtifact(artifact)
-					mavenDeployment.addArtifact(artifact)
-					if(logger.isDebugEnabled()) logger.debug('Added artifact: {}', artifact)
 				}
+				if(logger.isInfoEnabled()) logger.info('Created signature files {}.', allFiles)
+	
+				def findClassifierPattern = /(.+?)-$project.version(?:-(.+))?\.(\w+\.asc)/
+	
+				for(File file in allFiles)
+				{
+					def filename = file.name
+					if(filename.endsWith('.xml.asc')) {
+						DefaultPublishArtifact artifact = new DefaultPublishArtifact(filename, 'Artifact Signature', 'pom.asc', null, new Date(), file, this) 
+						mavenDeployment.addArtifact(artifact)
+						if(logger.isDebugEnabled()) logger.debug('Added artifact: {}', artifact)
+					} else {
+						assert filename ==~ findClassifierPattern
+						// xlson saved the day again ;)
+						(filename =~ findClassifierPattern).find { full, basename, classifier, fileEnding ->
+							if(logger.isDebugEnabled()) {
+								logger.debug('Full: {}', full)
+								logger.debug('Basename: {}', basename)
+								logger.debug('Classifier: {}', classifier)
+								logger.debug('File ending: {}', fileEnding)
+							}
+							DefaultPublishArtifact artifact = new DefaultPublishArtifact(full, 'Artifact Signature', fileEnding, classifier, new Date(), file, this) 
+							mavenDeployment.addArtifact(artifact)
+							if(logger.isDebugEnabled()) logger.debug('Added artifact: {}', artifact)
+						}
+					}
 				}
 			}
-		}
 		}
 	}
 }
