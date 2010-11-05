@@ -37,6 +37,7 @@ package de.huxhorn.gradle.pgp
 import org.gradle.api.*
 import org.gradle.api.logging.*
 import org.gradle.api.internal.artifacts.publish.DefaultPublishArtifact
+import org.gradle.api.artifacts.maven.MavenDeployer
 
 class PgpPlugin implements Plugin<Project> {
 	def logger = Logging.getLogger(this.class)
@@ -49,8 +50,14 @@ class PgpPlugin implements Plugin<Project> {
 	
 	def void apply(Project project) {
         project.convention.plugins.pgp = new PgpPluginConvention()
-		project.getByName('uploadArchives').doFirst {
-			
+        def uploadTask = project.getByName('uploadArchives')
+        uploadTask.repositories.withType(MavenDeployer).allObjects { repository ->
+			repository.beforeDeployment { mavenDeployment ->
+			println mavenDeployment.pomArtifact.file
+			//mavenDeployment.addArtifact(new DefaultPublishArtifact(.....))
+			//}
+		//}
+		//project.getByName('uploadArchives').doFirst {
 			def secretKeyRingFile = project.convention.plugins.pgp.secretKeyRingFile
 			def keyId = project.convention.plugins.pgp.keyId
 			if(!secretKeyRingFile || !secretKeyRingFile.isFile()
@@ -90,10 +97,12 @@ class PgpPlugin implements Plugin<Project> {
 			}
 
 			def defConf=project.getConfigurations().getByName('default')
-			def archivesConf=project.getConfigurations().getByName('archives')
+			//def archivesConf=project.getConfigurations().getByName('archives')
 			
 			List<File> allFiles=new ArrayList<File>()
-			for(File file in defConf.allArtifactFiles.files) {
+			List<File> signFiles=new ArrayList<File>(defConf.allArtifactFiles.files)
+			signFiles.add(mavenDeployment.pomArtifact.file)
+			for(File file in signFiles) {
 				if(logger.isInfoEnabled())
 					logger.info("Creating signature(s) for file '${file.absolutePath}'...")
 				List<File> files = signer.sign(file)
@@ -110,6 +119,15 @@ class PgpPlugin implements Plugin<Project> {
 			for(File file in allFiles)
 			{
 				def filename = file.name
+				if(filename.endsWith('.xml.asc')) {
+					// This code requires b61193bd38ba88e73f197957b597862897a6f2dc
+					// (Fri Oct 01 2010 01:41:47 GMT+0200 (CEST)) or newer
+					// of Gradle
+					DefaultPublishArtifact artifact = new DefaultPublishArtifact(filename, 'Artifact Signature', 'pom.asc', null, new Date(), file, this) 
+					//archivesConf.addArtifact(artifact)
+					mavenDeployment.addArtifact(artifact)
+					if(logger.isDebugEnabled()) logger.debug('Added artifact: {}', artifact)
+				} else {
 				assert filename ==~ findClassifierPattern
 				// xlson saved the day again ;)
 				(filename =~ findClassifierPattern).find { full, basename, classifier, fileEnding ->
@@ -124,10 +142,13 @@ class PgpPlugin implements Plugin<Project> {
 					// (Fri Oct 01 2010 01:41:47 GMT+0200 (CEST)) or newer
 					// of Gradle
 					DefaultPublishArtifact artifact = new DefaultPublishArtifact(full, 'Artifact Signature', fileEnding, classifier, new Date(), file, this) 
-					archivesConf.addArtifact(artifact)
+					//archivesConf.addArtifact(artifact)
+					mavenDeployment.addArtifact(artifact)
 					if(logger.isDebugEnabled()) logger.debug('Added artifact: {}', artifact)
 				}
+				}
 			}
+		}
 		}
 	}
 }
