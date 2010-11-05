@@ -38,7 +38,7 @@ dependsOnChildren()
 allprojects {
 	defaultTasks 'clean', 'build', 'uploadArchives'
 	group = 'de.huxhorn.gradle'
-	version = '0.0.2'
+	version = '0.0.3'
 	if(!System.properties.'release')
 	{
 		version = version + '-SNAPSHOT'
