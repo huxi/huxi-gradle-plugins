@@ -93,7 +93,7 @@ subprojects {
 	}
 
 
-	task sourceJar(type: Jar) { from sourceSets.main.allSource; classifier = 'source' }
+	task sourceJar(type: Jar) { from sourceSets.main.allSource; classifier = 'sources' }
 	task javadocJar(type: Jar) { from javadoc.outputs.files; classifier = 'javadoc' }
 	
 	artifacts { archives sourceJar, javadocJar }
@@ -126,8 +126,9 @@ subprojects {
     defaultProject = {
     	url 'http://gradle.huxhorn.de'
     	
+    	name 'gradle-pgp-plugin'
+    	description 'Plugin providing the ability to sign artifacts and pom before uploading to a repository.'
     	inceptionYear '2010'
-    	
     	packaging 'jar' // does not work, fixed below
     	// See http://jira.codehaus.org/browse/GRADLE-1200
 
