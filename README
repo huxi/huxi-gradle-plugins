@@ -8,7 +8,8 @@ This is a very rough version of a plugin that's supposed to work like
 the maven-gpg-plugin. It should be able to sign all artifacts before
 uploading them, including the signature files.
 
-As I stated, everything is still unfinished.
+This plugin requires Gradle ff3496fd63d39769d2d2df154ae373493c504f41 - Fri Nov 05 2010 05:49:51 GMT+0100 (CET) or newer.
+
 
 To use the plugin, clone this repository and build calling 'gradle'.
 
@@ -61,15 +62,13 @@ Keep in mind that you can also define the above gradle properties in the file
 See http://www.gradle.org/0.9-rc-2/docs/userguide/tutorial_this_and_that.html#sec:gradle_properties_and_system_properties
 
 The current version has several issues:
-- The pom file itself isn't signed yet! Only the artifacts are signed at the moment.
 - If no password is given using either the gradle property 'pgpPassword' or 
   password in the convention above (which would actually both be a rather bad 
   idea concerning security) then the plugin asks once for password entry using
   console.readPassword. This requires Java 6.
 - The text output 'Enter PGP-Password: ' is mixed up with the '> Building > :foo:uploadArchives' text. 
   The password is prompted for after the later one.
-- This plugin currently attaches itself to uploadArtifact.doFirst - which is probably a bad idea.
-- The configuration used for signing is always 'default'
+(- The configuration used for signing is always 'default')
 
 To perform a release you have to call
 
