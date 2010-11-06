@@ -4,7 +4,7 @@ artifactMapping = [
 
 buildscript {
 	apply from: 'dependencyDefinitions.gradle'
-	version = '0.0.2'
+	version = '0.0.3'
 	if(!System.properties.'release')
 	{
 		version = version + '-SNAPSHOT'
@@ -91,7 +91,6 @@ subprojects {
 			keyId = '740A1840'
 		}
 	}
-
 
 	task sourceJar(type: Jar) { from sourceSets.main.allSource; classifier = 'sources' }
 	task javadocJar(type: Jar) { from javadoc.outputs.files; classifier = 'javadoc' }
