@@ -4,27 +4,20 @@ http://jira.codehaus.org/browse/GRADLE-1035 - Provide a 'maven central' plugin t
 for related Gradle issues.
 
 
-This is a very rough version of a plugin that's supposed to work like
-the maven-gpg-plugin. It should be able to sign all artifacts before
-uploading them, including the signature files.
+This plugin works like the maven-gpg-plugin. It signs all artifacts - including
+the pom - before uploading them.
 
 This plugin requires Gradle ff3496fd63d39769d2d2df154ae373493c504f41 - Fri Nov 05 2010 05:49:51 GMT+0100 (CET) or newer.
 
 
-To use the plugin, clone this repository and build calling 'gradle'.
-
 In the project that would like to use this plugin, add the following:
 
 buildscript {
-	localReleaseRepo = new File("${System.properties.'user.home'}/local-gradle-repository/release").toURL().toString()
-	localSnapshotRepo = new File("${System.properties.'user.home'}/local-gradle-repository/snapshot").toURL().toString()
 	repositories {
 		mavenCentral()
-		mavenRepo urls: localReleaseRepo
-		mavenRepo urls: localSnapshotRepo
 	}
 	dependencies {
-		classpath 'de.huxhorn.gradle:pgp-gradle-plugin:0.0.2-SNAPSHOT'
+		classpath 'de.huxhorn.gradle:pgp-gradle-plugin:0.0.3'
 	}
 }
 
@@ -70,6 +63,9 @@ The current version has several issues:
   The password is prompted for after the later one.
 (- The configuration used for signing is always 'default')
 
+
+To build this plugin yourself, clone this repository and execute 'gradle'.
+
 To perform a release you have to call
 
 gradle -Drelease=true
@@ -79,6 +75,22 @@ rm -rf ~/.gradle/cache
 
 Signing can (or should) be performed calling
 gradle -Drelease=true -Dsign=true
+
+The buildscript of your project needs to look like this if you want to use your locally built version:
+
+buildscript {
+	localReleaseRepo = new File("${System.properties.'user.home'}/local-gradle-repository/release").toURL().toString()
+	localSnapshotRepo = new File("${System.properties.'user.home'}/local-gradle-repository/snapshot").toURL().toString()
+	repositories {
+		mavenCentral()
+		mavenRepo urls: localReleaseRepo
+		mavenRepo urls: localSnapshotRepo
+	}
+	dependencies {
+		classpath 'de.huxhorn.gradle:pgp-gradle-plugin:0.0.3-SNAPSHOT'
+	}
+}
+
 
 I'd appreciate any input and suggestions concerning this plugin, the issues above or general ideas how to enhance it.
 
