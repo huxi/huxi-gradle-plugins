@@ -82,7 +82,8 @@ class PgpPlugin implements Plugin<Project> {
 				if(!keyId) {
 					throw new InvalidUserDataException("Missing keyId! Specify using convention 'pgp { keyId = 'cafebabe' }' or gradle property '-PpgpKeyId=cafebabe'.")
 				}
-	
+				keyId = keyId.toLowerCase() // keyIds are always referred to in lower-case
+
 				boolean resetPassword = false
 				signer.setSecretKeyRingFile( secretKeyRingFile )
 	
