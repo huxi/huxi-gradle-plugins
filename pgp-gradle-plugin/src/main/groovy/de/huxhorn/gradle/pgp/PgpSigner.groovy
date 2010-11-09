@@ -79,6 +79,8 @@ class PgpSigner {
 	static {
 		// this needs to be added once
 		Security.addProvider(new BouncyCastleProvider())
+		final Logger logger=LoggerFactory.getLogger(PgpSigner)
+		if(logger.isDebugEnabled()) logger.debug('Added BouncyCastleProvider.')
 	}
 	
 	/**

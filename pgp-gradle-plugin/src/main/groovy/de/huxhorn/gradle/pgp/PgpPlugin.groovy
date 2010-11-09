@@ -50,7 +50,13 @@ class PgpPlugin implements Plugin<Project> {
 	 * Static so password is only requested once if keyId isn't changed in
 	 * sub-projects.
 	 */
-	private static PgpSigner signer=new PgpSigner();
+	private static final PgpSigner signer;
+	
+	static {
+		signer=new PgpSigner();
+		def logger = Logging.getLogger(PgpPlugin)
+		if(logger.isDebugEnabled()) logger.debug('Created PgpSigner instance.')
+	}
 	
 	def void apply(Project project) {
         project.convention.plugins.pgp = new PgpPluginConvention()
@@ -81,6 +87,7 @@ class PgpPlugin implements Plugin<Project> {
 				signer.setSecretKeyRingFile( secretKeyRingFile )
 	
 				if(keyId != signer.keyId) {
+					if(logger.isDebugEnabled()) logger.debug('keyId={}, signer.keyId={} => resetPassword=true', keyId, signer.keyId)
 					signer.keyId = keyId
 					resetPassword = true
 					// reset signer password if keyId changes
@@ -88,10 +95,12 @@ class PgpPlugin implements Plugin<Project> {
 				}
 				
 				if(resetPassword) {
+					if(logger.isDebugEnabled()) logger.debug('(Re)Setting password to value from pgp convention.')
 					signer.password = project.convention.plugins.pgp.password
 				}
 	
 				if(!signer.password && project.hasProperty('pgpPassword')) {
+					if(logger.isDebugEnabled()) logger.debug('Setting password to value from project property \'pgpPassword\'')
 					signer.password = project.pgpPassword
 				}
 	
