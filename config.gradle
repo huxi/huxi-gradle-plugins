@@ -4,7 +4,7 @@ artifactMapping = [
 
 buildscript {
 	apply from: 'dependencyDefinitions.gradle'
-	version = '0.0.3'
+	version = '0.0.4'
 	if(!System.properties.'release')
 	{
 		version = version + '-SNAPSHOT'
@@ -38,7 +38,7 @@ dependsOnChildren()
 allprojects {
 	defaultTasks 'clean', 'build', 'uploadArchives'
 	group = 'de.huxhorn.gradle'
-	version = '0.0.3'
+	version = '0.0.4'
 	if(!System.properties.'release')
 	{
 		version = version + '-SNAPSHOT'
