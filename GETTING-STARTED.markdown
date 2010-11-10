@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This is plugin that mimics the behavior of maven-gpg-plugin but for the [Gradle](http://gradle.org/) build system. It was created to help make it easier to use Gradle to deploy signed maven artifacts to maven repositories. It's especially important as you the signtures are needed to be able to deploy artifacts to Sonatypes OSS Repo which will allow you to push your releases to Maven Central.
+This is plugin that mimics the behavior of maven-gpg-plugin but for the [Gradle](http://gradle.org/) build system. It was created to help make it easier to use Gradle to deploy signed maven artifacts to maven repositories. It's especially important as you the signatures are needed to be able to deploy artifacts to Sonatypes OSS Repo which will allow you to push your releases to Maven Central.
 
 **Important:** You currently need to build Gradle from source to use it (Commit [gradle/ff3496fd63d39769d2d2df154ae373493c504f41](https://github.com/gradle/gradle/commit/ff3496fd63d39769d2d2df154ae373493c504f41) or later), this should change soon.
 
@@ -28,7 +28,7 @@ It's time to add the plugin to your build-script. We'll also need access to Mave
         }
     
         dependencies {
-            classpath 'de.huxhorn.gradle:pgp-gradle-plugin:0.0.3'
+            classpath 'de.huxhorn.gradle:de.huxhorn.gradle.pgp-plugin:0.0.3'
         }
     }
 
