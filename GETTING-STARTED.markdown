@@ -13,6 +13,12 @@ This is plugin that mimics the behavior of maven-gpg-plugin but for the [Gradle]
 
 ## Getting Started
 
+This guide should be all you need to get started with the PGP plugin,
+but you will have to read up on how to use the Gradle Maven Plugin
+yourself and also how to create your secret key for signing. The
+build in the `samples/` folder should give you an idea
+of what you are aiming for.
+
 ### Requirements
 
 1. You need the latest version of Gradle built from source, as mentioned earlier (instructions [here](http://gradle.org/build.html))
