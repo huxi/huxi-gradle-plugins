@@ -7,7 +7,7 @@ for related Gradle issues.
 This plugin works like the maven-gpg-plugin. It signs all artifacts - including
 the pom - before uploading them.
 
-This plugin requires Gradle ff3496fd63d39769d2d2df154ae373493c504f41 - Fri Nov 05 2010 05:49:51 GMT+0100 (CET) or newer.
+This plugin requires Gradle 0.9.2 or newer.
 
 
 In the project that would like to use this plugin, add the following:

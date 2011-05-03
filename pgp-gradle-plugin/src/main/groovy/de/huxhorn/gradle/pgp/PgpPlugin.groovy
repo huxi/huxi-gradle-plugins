@@ -40,8 +40,7 @@ import org.gradle.api.internal.artifacts.publish.DefaultPublishArtifact
 import org.gradle.api.artifacts.maven.MavenDeployer
 
 /**
- * This class requires Gradle ff3496fd63d39769d2d2df154ae373493c504f41
- * Fri Nov 05 2010 05:49:51 GMT+0100 (CET) or newer
+ * This class requires Gradle 0.9.2 or newer
  */
 class PgpPlugin implements Plugin<Project> {
 	def logger = Logging.getLogger(this.class)
@@ -61,7 +60,7 @@ class PgpPlugin implements Plugin<Project> {
 	def void apply(Project project) {
         project.convention.plugins.pgp = new PgpPluginConvention()
         def uploadTask = project.getByName('uploadArchives')
-        uploadTask.repositories.withType(MavenDeployer).allObjects { repository ->
+        uploadTask.repositories.withType(MavenDeployer).all { repository ->
 			repository.beforeDeployment { mavenDeployment ->
 				def secretKeyRingFile = project.convention.plugins.pgp.secretKeyRingFile
 				def keyId = project.convention.plugins.pgp.keyId
