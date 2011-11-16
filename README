@@ -1,3 +1,13 @@
+I just released 0.0.4 of the 'sign' plugin so it is compatible with 1.0-milestone-5 of Gradle.
+Originally, I didn't plan to update this plugin since Gradle 1.0-milestone-5 includes a similar plugin natively.
+
+See http://gradle.org/current/docs/userguide/userguide_single.html#signing_plugin
+
+But since stigkj was so kind to provide the necessary changes, I didn't have any excuses anymore. ;)
+Thank you, Stig!
+
+Beside that, the pgp-plugin won't be actively supported anymore!
+
 See 
 http://jira.codehaus.org/browse/GRADLE-1172 - Add PGP signature support to the maven plugin
 http://jira.codehaus.org/browse/GRADLE-1035 - Provide a 'maven central' plugin to ease deployment of artifacts and ensure well-formed poms
