@@ -2,17 +2,18 @@
 
 buildscript {
     repositories {
+        mavenLocal()
         mavenCentral()
     }
     
     dependencies {
-        classpath 'de.huxhorn.gradle:de.huxhorn.gradle.pgp-plugin:0.0.3'
+        classpath 'de.huxhorn.gradle:de.huxhorn.gradle.pgp-plugin:0.0.4-SNAPSHOT'
     }
 }
 
 apply plugin: 'java'
 apply plugin: 'maven'
-apply plugin: de.huxhorn.gradle.pgp.PgpPlugin
+apply plugin: 'sign'
 
 version = '0.1-SNAPSHOT'
 group = 'com.domain.yourproject'
