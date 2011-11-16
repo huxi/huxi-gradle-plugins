@@ -59,7 +59,7 @@ class PgpPlugin implements Plugin<Project> {
 	
 	def void apply(Project project) {
         project.convention.plugins.pgp = new PgpPluginConvention()
-        def uploadTask = project.getByName('uploadArchives')
+        def uploadTask = project.getTasks().getByName('uploadArchives')
         uploadTask.repositories.withType(MavenDeployer).all { repository ->
 			repository.beforeDeployment { mavenDeployment ->
 				def secretKeyRingFile = project.convention.plugins.pgp.secretKeyRingFile
