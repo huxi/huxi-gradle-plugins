@@ -7,7 +7,7 @@ buildscript {
     }
     
     dependencies {
-        classpath 'de.huxhorn.gradle:de.huxhorn.gradle.pgp-plugin:0.0.4-SNAPSHOT'
+        classpath 'de.huxhorn.gradle:de.huxhorn.gradle.pgp-plugin:0.0.4'
     }
 }
 
