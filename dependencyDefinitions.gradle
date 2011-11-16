@@ -1,12 +1,12 @@
 versions = [
-'logback':        '0.9.26',
-'slf4j':          '1.6.1',
+'logback':        '1.0.0',
+'slf4j':          '1.6.4',
 ]
 
 libraries = [
-'bcpg':                     'org.bouncycastle:bcpg-jdk15:1.45',
+'bcpg':                     'org.bouncycastle:bcpg-jdk15:1.46',
 'jcl-over-slf4j':           "org.slf4j:jcl-over-slf4j:${versions.slf4j}",
-'junit':                    'junit:junit:4.8.2',
+'junit':                    'junit:junit:4.10',
 'log4j-over-slf4j':         "org.slf4j:log4j-over-slf4j:${versions.slf4j}",
 'logback-access':           "ch.qos.logback:logback-access:${versions.logback}",
 'logback-classic':          "ch.qos.logback:logback-classic:${versions.logback}",
