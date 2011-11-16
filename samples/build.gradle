@@ -15,6 +15,10 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'sign'
 
+task wrapper(type: Wrapper) {
+	gradleVersion = '1.0-milestone-5'
+}
+
 version = '0.1-SNAPSHOT'
 group = 'com.domain.yourproject'
 
