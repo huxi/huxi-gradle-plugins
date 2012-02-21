@@ -35,12 +35,13 @@
 package de.huxhorn.gradle.git 
 
 import org.gradle.api.*
-import org.gradle.api.tasks.TaskAction; 
+import org.gradle.api.tasks.TaskAction
 import org.gradle.api.logging.*
 
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.lib.Repository
+import org.eclipse.jgit.lib.RepositoryState
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import org.eclipse.jgit.api.Git
 
 import groovy.transform.Canonical
 import groovy.transform.ToString
@@ -86,76 +87,82 @@ class GitStateTask extends DefaultTask {
 				.build();
 			logger.debug('Created git repository.')
 			
-			Git git = Git.wrap(repository)
-			def status = git.status().call()
-			if(status) {
-				if(status.added) {
-					message.append('Added:\n')
-					for(String current : status.added) {
-						message.append("\t${current}\n")
-					}
-					dirty = true
-				}
-				if(status.changed) {
-					if(message.length()) {
-						message.append('\n')
-					}
-					message.append('Changed:\n')
-					for(String current : status.changed) {
-						message.append("\t${current}\n")
-					}
-					dirty = true
-				}
-				if(status.conflicting) {
-					if(message.length()) {
-						message.append('\n')
-					}
-					message.append('Conflicting:\n')
-					for(String current : status.conflicting) {
-						message.append("\t${current}\n")
-					}
-					dirty = true
-				}
-				if(status.missing) {
-					if(message.length()) {
-						message.append('\n')
-					}
-					message.append('Missing:\n')
-					for(String current : status.missing) {
-						message.append("\t${current}\n")
-					}
-					dirty = true
-				}
-				if(status.modified) {
-					if(message.length()) {
-						message.append('\n')
-					}
-					message.append('Modified:\n')
-					for(String current : status.modified) {
-						message.append("\t${current}\n")
-					}
-					dirty = true
-				}
-				if(status.removed) {
-					if(message.length()) {
-						message.append('\n')
-					}
-					message.append('Removed:\n')
-					for(String current : status.removed) {
-						message.append("\t${current}\n")
-					}
-					dirty = true
-				}
-				if(status.untracked) {
-					if(!project.git.ignoreUntracked) {
-						if(message.length()) {
-							message.append('\n')
-						}
-						message.append('Untracked:\n')
-						for(String current : status.untracked) {
+			def state = repository.getRepositoryState()
+			if(state != RepositoryState.SAFE) {
+				message.append("Repository is in state ${state}.")
+				dirty = true
+			} else {
+				Git git = Git.wrap(repository)
+				def status = git.status().call()
+				if(status) {
+					if(status.added) {
+						message.append('Added:\n')
+						for(String current : status.added) {
 							message.append("\t${current}\n")
 						}
 						dirty = true
+					}
+					if(status.changed) {
+						if(message.length()) {
+							message.append('\n')
+						}
+						message.append('Changed:\n')
+						for(String current : status.changed) {
+							message.append("\t${current}\n")
+						}
+						dirty = true
+					}
+					if(status.conflicting) {
+						if(message.length()) {
+							message.append('\n')
+						}
+						message.append('Conflicting:\n')
+						for(String current : status.conflicting) {
+							message.append("\t${current}\n")
+						}
+						dirty = true
+					}
+					if(status.missing) {
+						if(message.length()) {
+							message.append('\n')
+						}
+						message.append('Missing:\n')
+						for(String current : status.missing) {
+							message.append("\t${current}\n")
+						}
+						dirty = true
+					}
+					if(status.modified) {
+						if(message.length()) {
+							message.append('\n')
+						}
+						message.append('Modified:\n')
+						for(String current : status.modified) {
+							message.append("\t${current}\n")
+						}
+						dirty = true
+					}
+					if(status.removed) {
+						if(message.length()) {
+							message.append('\n')
+						}
+						message.append('Removed:\n')
+						for(String current : status.removed) {
+							message.append("\t${current}\n")
+						}
+						dirty = true
+					}
+					if(status.untracked) {
+						if(!project.git.ignoreUntracked) {
+							if(message.length()) {
+								message.append('\n')
+							}
+							message.append('Untracked:\n')
+							for(String current : status.untracked) {
+								message.append("\t${current}\n")
+							}
+							dirty = true
+						}
 					}
 				}
 			}
