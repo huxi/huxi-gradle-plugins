@@ -55,7 +55,7 @@ allprojects {
 }
 
 project(':pgp-plugin') {
-	version = '0.0.4'
+	version = '0.0.5'
 	if(!System.properties.'release')
 	{
 		version = version + '-SNAPSHOT'
