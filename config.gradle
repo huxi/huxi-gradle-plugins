@@ -1,16 +1,13 @@
 import org.gradle.plugins.signing.Sign
 
 artifactMapping = [
-'pgp-gradle-plugin':                 'de.huxhorn.gradle.pgp-plugin'
+'pgp-gradle-plugin':                 'de.huxhorn.gradle.pgp-plugin',
+'git-state-plugin':                  'de.huxhorn.gradle.git-state-plugin'
 ]
 
 buildscript {
 	apply from: 'dependencyDefinitions.gradle'
-	version = '0.0.4'
-	if(!System.properties.'release')
-	{
-		version = version + '-SNAPSHOT'
-	}
+
 	localReleaseRepoFile = new File("${System.properties.'user.home'}/local-gradle-repository/release")
 	localSnapshotRepoFile = new File("${System.properties.'user.home'}/local-gradle-repository/snapshot")
 	localReleaseRepo = localReleaseRepoFile.toURL().toString()
@@ -27,7 +24,7 @@ buildscript {
 	}
 	dependencies {
 		// needed for syncSnapshot and syncStaging
-		classpath "org.apache.maven.wagon:wagon-webdav-jackrabbit:1.0-beta-6"
+		classpath "org.apache.maven.wagon:wagon-webdav-jackrabbit:2.2"
 	}
 }
 
@@ -55,7 +52,18 @@ if(!System.properties.'release') {
 allprojects {
 	defaultTasks 'clean', 'build', 'uploadArchives'
 	group = 'de.huxhorn.gradle'
+}
+
+project(':pgp-gradle-plugin') {
 	version = '0.0.4'
+	if(!System.properties.'release')
+	{
+		version = version + '-SNAPSHOT'
+	}
+}
+
+project(':git-state-plugin') {
+	version = '0.0.1'
 	if(!System.properties.'release')
 	{
 		version = version + '-SNAPSHOT'
