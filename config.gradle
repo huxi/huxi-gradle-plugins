@@ -1,7 +1,7 @@
 import org.gradle.plugins.signing.Sign
 
 artifactMapping = [
-'pgp-gradle-plugin':                 'de.huxhorn.gradle.pgp-plugin',
+'pgp-plugin':                        'de.huxhorn.gradle.pgp-plugin',
 'git-state-plugin':                  'de.huxhorn.gradle.git-state-plugin'
 ]
 
@@ -54,7 +54,7 @@ allprojects {
 	group = 'de.huxhorn.gradle'
 }
 
-project(':pgp-gradle-plugin') {
+project(':pgp-plugin') {
 	version = '0.0.4'
 	if(!System.properties.'release')
 	{

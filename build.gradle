@@ -5,7 +5,7 @@ task wrapper(type: Wrapper) {
 	gradleVersion = '1.0-milestone-8a'
 }
 
-project(':pgp-gradle-plugin').dependencies {
+project(':pgp-plugin').dependencies {
 	compile libraries.'slf4j-api'
 	compile libraries.'bcpg'
 }

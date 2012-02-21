@@ -1,2 +1,2 @@
-include 'pgp-gradle-plugin'
+include 'pgp-plugin'
 include 'git-state-plugin'
