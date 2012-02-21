@@ -78,6 +78,7 @@ class GitStateTask extends DefaultTask {
     	}
     	
 		boolean dirty=false
+		StringBuilder message = new StringBuilder()
 		try {
 			FileRepositoryBuilder builder = new FileRepositoryBuilder();
 			Repository repository = builder.readEnvironment() // scan environment GIT_* variables
@@ -89,32 +90,71 @@ class GitStateTask extends DefaultTask {
 			def status = git.status().call()
 			if(status) {
 				if(status.added) {
-					println("status.added: ${status.added}")
+					message.append('Added:\n')
+					for(String current : status.added) {
+						message.append("\t${current}\n")
+					}
 					dirty = true
 				}
 				if(status.changed) {
-					println("status.changed: ${status.changed}")
+					if(message.length()) {
+						message.append('\n')
+					}
+					message.append('Changed:\n')
+					for(String current : status.changed) {
+						message.append("\t${current}\n")
+					}
 					dirty = true
 				}
 				if(status.conflicting) {
-					println("status.conflicting: ${status.conflicting}")
+					if(message.length()) {
+						message.append('\n')
+					}
+					message.append('Conflicting:\n')
+					for(String current : status.conflicting) {
+						message.append("\t${current}\n")
+					}
 					dirty = true
 				}
 				if(status.missing) {
-					println("status.missing: ${status.missing}")
+					if(message.length()) {
+						message.append('\n')
+					}
+					message.append('Missing:\n')
+					for(String current : status.missing) {
+						message.append("\t${current}\n")
+					}
 					dirty = true
 				}
 				if(status.modified) {
-					println("status.modified: ${status.modified}")
+					if(message.length()) {
+						message.append('\n')
+					}
+					message.append('Modified:\n')
+					for(String current : status.modified) {
+						message.append("\t${current}\n")
+					}
 					dirty = true
 				}
 				if(status.removed) {
-					println("status.removed: ${status.removed}")
+					if(message.length()) {
+						message.append('\n')
+					}
+					message.append('Removed:\n')
+					for(String current : status.removed) {
+						message.append("\t${current}\n")
+					}
 					dirty = true
 				}
 				if(status.untracked) {
 					if(!project.git.ignoreUntracked) {
-						println("status.untracked: ${status.untracked}")
+						if(message.length()) {
+							message.append('\n')
+						}
+						message.append('Untracked:\n')
+						for(String current : status.untracked) {
+							message.append("\t${current}\n")
+						}
 						dirty = true
 					}
 				}
@@ -126,7 +166,10 @@ class GitStateTask extends DefaultTask {
 		}
 		
 		if(dirty) {
+			logger.lifecycle(message.toString())
 			throw new IllegalStateException('Git repository is dirty!')
+		} else {
+			logger.info('Git repository is clean.')
 		}
     }
 }
