@@ -1,9 +1,9 @@
-versions = [
+project.ext.versions = [
 'logback':        '1.0.0',
 'slf4j':          '1.6.4',
 ]
 
-libraries = [
+project.ext.libraries = [
 'bcpg':                     'org.bouncycastle:bcpg-jdk15:1.46',
 'jcl-over-slf4j':           "org.slf4j:jcl-over-slf4j:${versions.slf4j}",
 'jgit':                     'org.eclipse.jgit:org.eclipse.jgit:1.3.0.201202151440-r',

@@ -1,6 +1,6 @@
 import org.gradle.plugins.signing.Sign
 
-artifactMapping = [
+project.ext.artifactMapping = [
 'pgp-plugin':                        'de.huxhorn.gradle.pgp-plugin',
 'git-state-plugin':                  'de.huxhorn.gradle.git-state-plugin'
 ]
@@ -8,10 +8,10 @@ artifactMapping = [
 buildscript {
 	apply from: 'dependencyDefinitions.gradle'
 
-	localReleaseRepoFile = new File("${System.properties.'user.home'}/local-gradle-repository/release")
-	localSnapshotRepoFile = new File("${System.properties.'user.home'}/local-gradle-repository/snapshot")
-	localReleaseRepo = localReleaseRepoFile.toURL().toString()
-	localSnapshotRepo = localSnapshotRepoFile.toURL().toString()
+	project.ext.localReleaseRepoFile = new File("${System.properties.'user.home'}/local-gradle-repository/release")
+	project.ext.localSnapshotRepoFile = new File("${System.properties.'user.home'}/local-gradle-repository/snapshot")
+	project.ext.localReleaseRepo = localReleaseRepoFile.toURL().toString()
+	project.ext.localSnapshotRepo = localSnapshotRepoFile.toURL().toString()
 	repositories {
 		mavenLocal()
 		mavenCentral()
@@ -28,8 +28,6 @@ buildscript {
 	}
 }
 
-dependsOnChildren()
-
 gradle.taskGraph.whenReady { taskGraph ->
 	if (taskGraph.allTasks.any { it instanceof Sign }) {
 		String pgpPassword = System.properties.'pgpPassword'
@@ -37,9 +35,9 @@ gradle.taskGraph.whenReady { taskGraph ->
 			Console console = System.console()
 			pgpPassword = new String(console.readPassword("\nPGP Private Key Password: "))
 		}
-		allprojects*.setProperty('signing.password', pgpPassword)
-		allprojects*.setProperty('signing.keyId','740A1840')
-		allprojects*.setProperty('signing.secretKeyRingFile', new File("${System.properties['user.home']}/.gnupg/secring.gpg").absolutePath)
+		allprojects { ext.'signing.keyId' = '740A1840' }
+		allprojects { ext.'signing.secretKeyRingFile' = new File("${System.properties['user.home']}/.gnupg/secring.gpg").absolutePath }
+		allprojects { ext."signing.password" = pgpPassword }
 	}
 }
 
@@ -87,7 +85,7 @@ subprojects {
 	
 	artifacts { archives sourceJar, javadocJar }
 
-    defaultProject = {
+    project.ext.defaultProject = {
     	url 'http://gradle.huxhorn.de'
     	
     	name 'gradle-pgp-plugin'
@@ -146,7 +144,7 @@ subprojects {
 		}
     }
     
-    mapped=artifactMapping[project.name];
+    def mapped=artifactMapping[project.name];
     if(!mapped)
     {
     	throw new IllegalStateException("${project.name} does not have an entry in artifactMapping!");
@@ -181,7 +179,7 @@ subprojects {
 				// dep is a native Maven dependency object (With properties artifactId, groupId, ...)
 				for(dep in pom.dependencies) {
 					//println(dep.artifactId)
-					mapping=artifactMapping[dep.artifactId];
+					def mapping=artifactMapping[dep.artifactId];
 					if(mapping) {
 						//println("Mapping ${dep.artifactId} to ${mapping}...")
 						dep.artifactId=mapping
@@ -190,13 +188,13 @@ subprojects {
 			}
 			beforeDeployment { MavenDeployment deployment ->
 				if(System.properties.'release') {
-					signPom(deployment)
+					signing.signPom(deployment)
 				}
 			}
 		}
 	}
 
-	installer = install.repositories.mavenInstaller
+	def installer = install.repositories.mavenInstaller
 
 	installer.pom.project defaultProject
 
