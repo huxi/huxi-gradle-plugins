@@ -58,7 +58,7 @@ class GitStatePlugin implements Plugin<Project> {
 				.build();
 			logger.debug('Created git repository.')
 			def headRef = repository.getRef("HEAD")
-			project.setProperty('gitHeadHash', headRef.objectId.name)
+			project.ext.gitHeadHash = headRef.objectId.name
 			repository.close()
 			logger.debug('Closed git repository.')
 		} catch (IllegalArgumentException ex) {
