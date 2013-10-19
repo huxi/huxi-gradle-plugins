@@ -158,7 +158,7 @@ subprojects {
 	
     dependencies {
 		compile gradleApi()
-		groovy localGroovy()
+		compile localGroovy()
 		testCompile libraries.junit
 		testCompile libraries.'slf4j-api'
 		testRuntime libraries.'logback-classic'
