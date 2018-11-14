@@ -1,6 +1,6 @@
 /*
  * git-state-plugin
- * Copyright (C) 2012 Joern Huxhorn
+ * Copyright (C) 2018 Joern Huxhorn
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -17,7 +17,7 @@
  */
 
 /*
- * Copyright 2012 Joern Huxhorn
+ * Copyright 2018 Joern Huxhorn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,20 +49,22 @@ import groovy.transform.ToString
 class GitStatePlugin implements Plugin<Project> {
 	def logger = Logging.getLogger(this.class)
 	
-	def void apply(Project project) {
+	void apply(Project project) {
 		project.extensions.git = new GitStatePluginExtension()
 		try {
-			FileRepositoryBuilder builder = new FileRepositoryBuilder();
+			println('project.projectDir: '+ project.projectDir)
+			FileRepositoryBuilder builder = new FileRepositoryBuilder()
 			Repository repository = builder.readEnvironment() // scan environment GIT_* variables
-				.findGitDir() // scan up the file system tree
-				.build();
+				.findGitDir(project.projectDir) // scan up the file system tree
+				.build()
+
 			logger.debug('Created git repository.')
-			def headRef = repository.getRef("HEAD")
+			def headRef = repository.findRef('HEAD')
 			project.ext.gitHeadHash = headRef.objectId.name
 			repository.close()
 			logger.debug('Closed git repository.')
 		} catch (IllegalArgumentException ex) {
-			// ignore, there is no git repository
+			logger.warn('Exception while resolving HEAD hash!', ex)
 		}
 			
 		// add task
@@ -81,10 +83,11 @@ class GitStateTask extends DefaultTask {
 		boolean dirty=false
 		StringBuilder message = new StringBuilder()
 		try {
-			FileRepositoryBuilder builder = new FileRepositoryBuilder();
+			FileRepositoryBuilder builder = new FileRepositoryBuilder()
 			Repository repository = builder.readEnvironment() // scan environment GIT_* variables
-				.findGitDir() // scan up the file system tree
-				.build();
+				.findGitDir(project.projectDir) // scan up the file system tree
+				.build()
+
 			logger.debug('Created git repository.')
 			
 			def state = repository.getRepositoryState()
@@ -169,7 +172,7 @@ class GitStateTask extends DefaultTask {
 			repository.close()
 			logger.debug('Closed git repository.')
 		} catch (IllegalArgumentException ex) {
-			// ignore, there is no git repository
+			logger.warn('Exception checking repository state!', ex)
 		}
 		
 		if(dirty) {

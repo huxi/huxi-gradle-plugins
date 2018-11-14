@@ -8,4 +8,5 @@ wrapper {
 project(':git-state-plugin').dependencies {
 	compile libraries.'slf4j-api'
 	compile libraries.'jgit'
+	testCompile libraries.'zt-zip'
 }

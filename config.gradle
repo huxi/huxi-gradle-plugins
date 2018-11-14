@@ -31,7 +31,7 @@ gradle.taskGraph.whenReady { taskGraph ->
 	if (taskGraph.allTasks.any { it instanceof Sign }) {
 		String pgpPassword = System.properties.'pgpPassword'
 		if(!pgpPassword) {
-			Console console = System.console()
+			java.io.Console console = System.console()
 			pgpPassword = new String(console.readPassword("\nPGP Private Key Password: "))
 		}
 		allprojects { ext.'signing.keyId' = '740A1840' }
@@ -52,7 +52,7 @@ allprojects {
 }
 
 project(':git-state-plugin') {
-	version = '0.0.2'
+	version = '0.0.3'
 	if(!System.properties.'release')
 	{
 		version = version + '-SNAPSHOT'

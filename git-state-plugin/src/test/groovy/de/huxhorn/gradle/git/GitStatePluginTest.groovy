@@ -1,6 +1,6 @@
 /*
  * git-state-plugin
- * Copyright (C) 2012 Joern Huxhorn
+ * Copyright (C) 2018 Joern Huxhorn
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -17,7 +17,7 @@
  */
 
 /*
- * Copyright 2012 Joern Huxhorn
+ * Copyright 2018 Joern Huxhorn
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,23 +35,28 @@
 package de.huxhorn.gradle.git 
 
 import org.junit.Test
+import org.zeroturnaround.zip.ZipUtil
+
 import static org.junit.Assert.*
 import org.gradle.api.*
 import org.gradle.testfixtures.ProjectBuilder
 
 class GitStatePluginTest {
 	@Test
-	public void checkGitHeadHash() {
+	void checkGitHeadHash() {
 		Project project = ProjectBuilder.builder().build()
+		unzipResourceIntoProject('/clean.zip', project)
+
 		project.apply plugin: 'git-state'
 		println "project.gitHeadHash: ${project.gitHeadHash}"
-		assertNotNull(project.gitHeadHash)
-		assertEquals(40, project.gitHeadHash.length())
+		assertEquals('d8435ab78d483666e2bb32565b8ed6d2adfe0346', project.gitHeadHash)
 	}
 
 	@Test
-	public void checkGitExtensionDefaults() {
+	void checkGitExtensionDefaults() {
 		Project project = ProjectBuilder.builder().build()
+		unzipResourceIntoProject('/clean.zip', project)
+
 		project.apply plugin: 'git-state'
 		println "project.git: ${project.git}"
 		assertNotNull(project.git)
@@ -60,32 +65,57 @@ class GitStatePluginTest {
 	}
 	
 	@Test
-	public void checkTaskAdded() {
+	void checkTaskAdded() {
 		Project project = ProjectBuilder.builder().build()
+		unzipResourceIntoProject('/clean.zip', project)
+
 		project.apply plugin: 'git-state'
 		assertTrue(project.tasks.checkGitState instanceof GitStateTask)
 	}
 
 	@Test
-	public void checkTaskExecuteDeactivated() {
+	void checkTaskExecuteDeactivated() {
 		Project project = ProjectBuilder.builder().build()
+		unzipResourceIntoProject('/clean.zip', project)
+
 		project.apply plugin: 'git-state'
 		assertTrue(project.tasks.checkGitState instanceof GitStateTask)
 		project.tasks.checkGitState.checkState()
 	}
 
 	@Test
-	public void checkTaskExecuteActivated() {
+	void checkTaskExecuteActivated() {
 		Project project = ProjectBuilder.builder().build()
+		unzipResourceIntoProject('/clean.zip', project)
+
 		project.apply plugin: 'git-state'
 		assertTrue(project.tasks.checkGitState instanceof GitStateTask)
 		project.git.requireClean = true
+		project.git.ignoreUntracked = true
+		project.tasks.checkGitState.checkState()
+		println 'State was clean.'
+	}
+
+	@Test
+	void checkTaskExecuteActivatedDirty() {
+		Project project = ProjectBuilder.builder().build()
+		unzipResourceIntoProject('/dirty.zip', project)
+
+		project.apply plugin: 'git-state'
+		assertTrue(project.tasks.checkGitState instanceof GitStateTask)
+		project.git.requireClean = true
+		project.git.ignoreUntracked = true
 		try {
 			project.tasks.checkGitState.checkState()
-			println 'State was clean.'
+			fail('This should throw an exception!')
 		} catch (IllegalStateException ex) {
-			println "Caught Exception: ${ex}"
+			assertEquals('Git repository is dirty!', ex.message)
 		}
+	}
+
+	private static void unzipResourceIntoProject(String resource, Project project) {
+		def resourceStream = GitStatePluginTest.class.getResourceAsStream(resource)
+		ZipUtil.unpack(resourceStream, project.projectDir)
 	}
 }
 
