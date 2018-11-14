@@ -1,7 +1,6 @@
 import org.gradle.plugins.signing.Sign
 
 project.ext.artifactMapping = [
-'pgp-plugin':                        'de.huxhorn.gradle.pgp-plugin',
 'git-state-plugin':                  'de.huxhorn.gradle.git-state-plugin'
 ]
 
@@ -50,14 +49,6 @@ if(!System.properties.'release') {
 allprojects {
 	defaultTasks 'clean', 'build', 'uploadArchives'
 	group = 'de.huxhorn.gradle'
-}
-
-project(':pgp-plugin') {
-	version = '0.0.5'
-	if(!System.properties.'release')
-	{
-		version = version + '-SNAPSHOT'
-	}
 }
 
 project(':git-state-plugin') {

@@ -5,13 +5,7 @@ wrapper {
 	gradleVersion = '5.0-rc-2'
 }
 
-project(':pgp-plugin').dependencies {
-	compile libraries.'slf4j-api'
-	compile libraries.'bcpg'
-}
-
 project(':git-state-plugin').dependencies {
 	compile libraries.'slf4j-api'
 	compile libraries.'jgit'
 }
-
