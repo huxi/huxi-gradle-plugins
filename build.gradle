@@ -1,8 +1,8 @@
 apply from: 'dependencyDefinitions.gradle'
 apply from: 'config.gradle'
 
-task wrapper(type: Wrapper) {
-	gradleVersion = '1.8'
+wrapper {
+	gradleVersion = '5.0-rc-2'
 }
 
 project(':pgp-plugin').dependencies {

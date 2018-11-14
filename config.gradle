@@ -241,15 +241,15 @@ deleteClosure = {
 	}
 }
 
-task cleanStaging << {	
+task cleanStaging doLast({	
 	deleteClosure(localReleaseRepoFile)
-}
+})
 
-task cleanSnapshot << {	
+task cleanSnapshot doLast({	
 	deleteClosure(localSnapshotRepoFile)
-}
+})
 
-task syncStaging << {
+task syncStaging doLast({
 	if (project.hasProperty('remoteUsername') && project.hasProperty('remotePassword')) {
 		def stagingRepos = new org.apache.maven.wagon.repository.Repository('staging', 'https://oss.sonatype.org/service/local/staging/deploy/maven2')
 		def auth = new org.apache.maven.wagon.authentication.AuthenticationInfo()
@@ -268,9 +268,9 @@ task syncStaging << {
 	} else {
 		println "Can't sync staging as credentials aren't set. Set with -PremoteUsername=user -PremotePassword=password."
 	}
-}
+})
 
-task syncSnapshot << {
+task syncSnapshot doLast({
 	if (project.hasProperty('remoteUsername') && project.hasProperty('remotePassword')) {
 		def snapshotRepos = new org.apache.maven.wagon.repository.Repository('snapshot', 'https://oss.sonatype.org/content/repositories/snapshots')
 		def auth = new org.apache.maven.wagon.authentication.AuthenticationInfo()
@@ -289,5 +289,5 @@ task syncSnapshot << {
 	} else {
 		println "Can't sync snapshots as credentials aren't set. Set with -PremoteUsername=user -PremotePassword=password."
 	}
-}
+})
 
